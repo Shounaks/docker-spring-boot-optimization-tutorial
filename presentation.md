@@ -161,9 +161,24 @@ What if we can copy the layers from the first build?
 
 ```
 think about 50 developers working on different builds! This reduces our time by half for simple application. 
-But there is a Cache?! Can anyone guess? 
+But there is a Catch?! Can anyone guess? 
 ![img_6.png](img_6.png)
 
 
 
 Yes for minor speed gain, we are adding manual files. and thats fine!
+
+# Future Lesson
+If you 💘 Optimization as these, we will have another session on:
+```markdown
+ Step #9: Use a Distroless Base Image
+ Step #10: Enable Class Data Sharing (CDS) for Faster Startup
+ Step #11: Remove Unused Layers with Squash (Reduces Size)
+ Step #12: Compress JAR Using UPX (Reduces Size)
+ Step #13: Use GraalVM Native Image for AOT Compilation
+ Step #14: Use docker scout to Remove Security Vulnerabilities
+ Step #15: Use Read-Only File System for Security
+ Step #16: Enable JVM Heap Dump on OOM (Better Debugging & Performance Tuning)
+```
+
+Thats All Folks!
