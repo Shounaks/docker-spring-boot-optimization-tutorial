@@ -1,0 +1,39 @@
+FROM maven:3.9.4-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+# Extract the JAR layers
+RUN mkdir -p /app/layers
+WORKDIR /app/layers
+RUN java -Djarmode=layertools -jar /app/target/docker-spring-boot-optimization-tutorial-0.0.1-SNAPSHOT.jar extract
+
+FROM eclipse-temurin:17-jre-alpine AS run
+RUN addgroup --system appgroup && adduser --system appuser
+WORKDIR /app
+
+# Extract the JAR layers
+RUN mkdir -p /app/layers
+WORKDIR /app/layers
+
+# Assigning Permissions need to be done before jumping into normal user
+COPY entrypoint.sh /entrypoint2.sh
+RUN chmod +x /entrypoint2.sh
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+COPY --from=build /app/target/docker-spring-boot-optimization-tutorial-0.0.1-SNAPSHOT.jar app.jar
+
+# Copy extracted layers separately
+COPY --from=build /app/layers/dependencies/ ./dependencies/
+COPY --from=build /app/layers/spring-boot-loader/ ./spring-boot-loader/
+COPY --from=build /app/layers/snapshot-dependencies/ ./snapshot-dependencies/
+COPY --from=build /app/layers/application/ ./application/
+
+STOPSIGNAL SIGTERM
+EXPOSE 8080
+ENV JAVA_OPTS="-XX:+UseSerialGC"
+ENV JAVA_CONTAINER="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -XX:InitialRAMPercentage=50 -XX:MinRAMPercentage=50"
+
+ENTRYPOINT ["/entrypoint2.sh"]
+

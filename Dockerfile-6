@@ -1,0 +1,23 @@
+FROM maven:3.9.4-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine AS run
+RUN addgroup --system appgroup && adduser --system appuser
+WORKDIR /app
+RUN chown -R appuser:appgroup /app
+USER appuser
+COPY --from=build /app/target/docker-spring-boot-optimization-tutorial-0.0.1-SNAPSHOT.jar app.jar
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+STOPSIGNAL SIGTERM
+EXPOSE 8080
+ENV JAVA_OPTS="-XX:+UseSerialGC"
+# This will give error => cause its not found, rather use an entrypoint script
+#CMD ["java $JAVA_OPTS", "-jar", "app.jar"]
+#CMD ["java", "$JAVA_OPTS", "-jar", "app.jar"]
+ENTRYPOINT ["/entrypoint.sh"]
+

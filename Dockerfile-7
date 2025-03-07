@@ -1,0 +1,24 @@
+FROM maven:3.9.4-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine AS run
+RUN addgroup --system appgroup && adduser --system appuser
+WORKDIR /app
+
+# Assigning Permissions need to be done before jumping into normal user
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+COPY --from=build /app/target/docker-spring-boot-optimization-tutorial-0.0.1-SNAPSHOT.jar app.jar
+
+STOPSIGNAL SIGTERM
+EXPOSE 8080
+ENV JAVA_OPTS="-XX:+UseSerialGC"
+ENV JAVA_CONTAINER="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -XX:InitialRAMPercentage=50 -XX:MinRAMPercentage=50"
+
+ENTRYPOINT ["/entrypoint.sh"]
+

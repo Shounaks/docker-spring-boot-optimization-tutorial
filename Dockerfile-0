@@ -1,0 +1,16 @@
+# Select a Decent Base Image
+FROM eclipse-temurin:21-jdk
+
+# Set Labels
+LABEL authors="Shounak Bhalerao"
+LABEL name="Dockerfile-0"
+
+# Select the work directory
+WORKDIR /app
+
+# How to interact with the image
+# Note: in dockerfile we can only expose the port, we need docker -p to actually get the output,
+# Use docker-compose to do this automatically
+EXPOSE 8080/tcp
+COPY target/docker-spring-boot-optimization-tutorial-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
